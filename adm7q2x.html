@@ -74,9 +74,15 @@ details[open]>summary h2{margin-bottom:10px}details>summary h2{margin:0}
         <div class="btns"><button id="pGive" class="g">＋ Выдать</button><button id="pTake" class="r">− Списать</button><button id="pZero" class="r">Обнулить баланс</button></div>
       </div>
       <div class="sub">
-        <label>Предметы (скины, титулы, фоны и всё остальное)</label>
+        <label>Предметы (скины, титулы, рамки, питомцы, фоны и всё остальное)</label>
         <div class="row"><select id="pKind"></select><select id="pItem"></select></div>
         <div class="btns"><button id="pItemGive" class="g">Выдать предмет</button><button id="pItemTake" class="r">Забрать</button></div>
+        <div class="btns"><button id="pAll" class="y">🎁 Выдать ВСЁ (все предметы игры)</button></div>
+      </div>
+      <div class="sub">
+        <label>Детали для крафта</label>
+        <div class="row"><select id="pMat"></select><input id="pMatN" type="number" inputmode="numeric" placeholder="сколько"></div>
+        <div class="btns"><button id="pMatGive" class="g">＋ Выдать детали</button><button id="pMatTake" class="r">− Списать</button><button id="pMatAll" class="g">＋ Каждой детали</button></div>
       </div>
       <div class="sub">
         <label>Щиты колеса</label>
@@ -104,6 +110,7 @@ details[open]>summary h2{margin-bottom:10px}details>summary h2{margin:0}
     <label>Предметы (необязательно)</label>
     <div class="row"><select id="gKind"></select><select id="gItem"></select><button id="gAdd" class="k" style="flex:0 0 auto">＋</button></div>
     <div id="gItems" class="chips"></div>
+    <label>Детали для крафта каждому (по столько каждой детали)</label><input id="gMats" type="number" inputmode="numeric" placeholder="например 5">
     <label>Текст подарка</label><input id="gText" placeholder="+1000 С НГ 🎄">
     <label>Сколько дней можно получить</label><input id="gDays" type="number" value="7">
     <div class="btns"><button id="gSend" class="y">🎁 Отправить всем</button><button id="gOff" class="k">Отменить подарок</button></div>
@@ -152,8 +159,8 @@ import { getFirestore, collection, query, where, getDocs, doc, getDoc, setDoc, d
 
 const app = initializeApp({ apiKey: 'AIzaSyA9nA7lvW_y8EeRMLgPumjx2-Iz3OQv-Rw', authDomain: 'stenojump.firebaseapp.com', projectId: 'stenojump' });
 const auth = getAuth(app), db = getFirestore(app);
-const CAT = {"skin": [["classic", "Классик"], ["ninja", "Ниндзя"], ["cool", "Крутой"], ["ping", "Пинг 999"], ["ragged", "Рваный"], ["shock", "Шок"], ["licker", "Лизун"], ["blackhand", "Чёрная рука"], ["kuryaga", "Куряга"], ["sosed", "Сосед"], ["scare", "Испуг"], ["diamond", "Алмазный"], ["emerald", "Изумрудный"], ["demon", "Демон"], ["ghost", "Призрак"], ["astro", "Космонавт"], ["cyborg", "Киборг"], ["worm", "Червь"]], "bg": [["clouds", "Ночное небо"], ["yard", "Зимний двор"], ["rex", "Рекс с газетой"], ["kfc", "Рекс в футболке"], ["money", "Деньги"], ["r67", "Кролик 67"], ["city", "Ночной город"], ["sakura", "Ночная сакура"], ["sunset", "Закат в поле"], ["camo", "Камуфляж"], ["snow", "Снежная ночь"], ["stripes", "Три полоски"], ["mono", "Монограмма"], ["cat", "Кот на районе"], ["paris", "Париж ночью"], ["ender", "Эндер"], ["fr_shop", "У магазина"], ["fr_pyramid", "Пирамида"], ["fr_tree", "Ночная компания"]], "sound": [["classic", "Классика"], ["meme", "Мем-микс"], ["pink", "Розовый хит"], ["amber", "Янтарный хит"], ["fire", "У костра"], ["ice", "Ледяной бас"], ["xphonk", "Фонк-ночь"], ["xfunk", "Фанк-сюрприз"], ["xjump", "Джампстайл"], ["xsneak", "Хитрый вор"], ["xneon", "Неоновый хит"], ["xshaggy", "Танец Шэгги"], ["xkisa", "Прыгай, киса"], ["xlala", "Ла-ла-ла"], ["france", "Франсе"], ["night", "Ночной город"]], "trail": [["dots", "Точки"], ["fire", "Огонь"], ["neon", "Неон"], ["stars", "Звёзды"], ["ice", "Лёд"], ["rainbow", "Радуга"], ["bolt", "Молния"], ["galaxy", "Галактика"], ["confetti", "Конфетти"], ["goldrain", "Золотой дождь"], ["aurora", "Северное сияние"], ["butterfly", "Волшебные бабочки"], ["notes", "Ноты"], ["phoenix", "Пламя феникса"], ["bubbles", "Мыльные пузыри"]], "map": [["brick", "Кирпичи"], ["ice", "Ледяная пещера"], ["lava", "Вулкан"], ["jungle", "Джунгли"], ["space", "Космостанция"], ["desert", "Пустыня"], ["gold", "Золотой дворец"], ["crystal", "Кристальная пещера"], ["matrix", "Матрица"], ["candy", "Конфетная страна"], ["rainbow", "Радужные облака"], ["ocean", "Подводный мир"]], "title": [["t_pens", "На пенсии"], ["t_krut", "Крутышка"], ["t_rasklad", "Какой расклад?"], ["t_odin", "Один такой"], ["t_kras", "Красавчик"], ["t_serd", "Сердцеед"], ["t_boss", "Босс"], ["t_dikiy", "Дикий"], ["t_bezb", "Без башни"], ["t_zakon", "Я тут закон!"], ["t_krov", "Жажда крови"], ["t_snip", "Снайпер"], ["t_levoy", "Одной левой!"], ["t_sorvi", "Сорвиголова"], ["t_leg", "Легенда"], ["t_vozd", "Воздухан"], ["t_glino", "Глиномес"], ["t_admin", "Админ"]]};
-const KIND_NAME = { skin: 'Скин', title: 'Титул', bg: 'Фон', sound: 'Звук', trail: 'Дорожка', map: 'Карта' };
+const CAT = {"skin": [["classic", "Классик"], ["ninja", "Ниндзя"], ["cool", "Крутой"], ["ping", "Пинг 999"], ["ragged", "Рваный"], ["shock", "Шок"], ["licker", "Лизун"], ["blackhand", "Чёрная рука"], ["kuryaga", "Куряга"], ["sosed", "Сосед"], ["scare", "Испуг"], ["diamond", "Алмазный"], ["emerald", "Изумрудный"], ["demon", "Демон"], ["ghost", "Призрак"], ["astro", "Космонавт"], ["cyborg", "Киборг"], ["worm", "Червь"]], "bg": [["clouds", "Ночное небо"], ["yard", "Зимний двор"], ["rex", "Рекс с газетой"], ["kfc", "Рекс в футболке"], ["money", "Деньги"], ["r67", "Кролик 67"], ["city", "Ночной город"], ["sakura", "Ночная сакура"], ["sunset", "Закат в поле"], ["camo", "Камуфляж"], ["snow", "Снежная ночь"], ["stripes", "Три полоски"], ["mono", "Монограмма"], ["cat", "Кот на районе"], ["paris", "Париж ночью"], ["ender", "Эндер"], ["fr_shop", "У магазина"], ["fr_pyramid", "Пирамида"], ["fr_tree", "Ночная компания"], ["c_aurora", "Сияние в горах (крафт)"], ["c_neon", "Неоновый мегаполис (крафт)"], ["c_marble", "Мрамор (крафт)"]], "sound": [["classic", "Классика"], ["meme", "Мем-микс"], ["pink", "Розовый хит"], ["amber", "Янтарный хит"], ["fire", "У костра"], ["ice", "Ледяной бас"], ["xphonk", "Фонк-ночь"], ["xfunk", "Фанк-сюрприз"], ["xjump", "Джампстайл"], ["xsneak", "Хитрый вор"], ["xneon", "Неоновый хит"], ["xshaggy", "Танец Шэгги"], ["xkisa", "Прыгай, киса"], ["xlala", "Ла-ла-ла"], ["france", "Франсе"], ["night", "Ночной город"]], "trail": [["dots", "Точки"], ["fire", "Огонь"], ["neon", "Неон"], ["stars", "Звёзды"], ["ice", "Лёд"], ["rainbow", "Радуга"], ["bolt", "Молния"], ["galaxy", "Галактика"], ["confetti", "Конфетти"], ["goldrain", "Золотой дождь"], ["aurora", "Северное сияние"], ["butterfly", "Волшебные бабочки"], ["notes", "Ноты"], ["phoenix", "Пламя феникса"], ["bubbles", "Мыльные пузыри"], ["c_hearts", "Сердца (крафт)"], ["c_neontr", "Неоновый след (крафт)"], ["c_starfall", "Звездопад (крафт)"], ["c_darkfire", "Чёрное пламя (крафт)"]], "map": [["brick", "Кирпичи"], ["ice", "Ледяная пещера"], ["lava", "Вулкан"], ["jungle", "Джунгли"], ["space", "Космостанция"], ["desert", "Пустыня"], ["gold", "Золотой дворец"], ["crystal", "Кристальная пещера"], ["matrix", "Матрица"], ["candy", "Конфетная страна"], ["rainbow", "Радужные облака"], ["ocean", "Подводный мир"], ["c_jungle", "Заросшие руины (крафт)"], ["c_station", "Орбитальная станция (крафт)"], ["c_desert", "Храм в пустыне (крафт)"], ["c_glitch", "Глитч (крафт)"]], "title": [["t_pens", "На пенсии"], ["t_krut", "Крутышка"], ["t_rasklad", "Какой расклад?"], ["t_odin", "Один такой"], ["t_kras", "Красавчик"], ["t_serd", "Сердцеед"], ["t_boss", "Босс"], ["t_dikiy", "Дикий"], ["t_bezb", "Без башни"], ["t_zakon", "Я тут закон!"], ["t_krov", "Жажда крови"], ["t_snip", "Снайпер"], ["t_levoy", "Одной левой!"], ["t_sorvi", "Сорвиголова"], ["t_leg", "Легенда"], ["t_vozd", "Воздухан"], ["t_glino", "Глиномес"], ["t_alhim", "Алхимик (крафт)"], ["t_tvor", "Творец (крафт)"], ["t_admin", "Админ (невозможный)"]], "frame": [["m500", "За метры: 500 м"], ["m1000", "За метры: 1000 м"], ["m1500", "За метры: 1500 м"], ["m2000", "За метры: 2000 м"], ["m2500", "За метры: 2500 м"], ["m3000", "За метры: 3000 м"], ["m3500", "За метры: 3500 м"], ["m4000", "За метры: 4000 м"], ["m4500", "За метры: 4500 м"], ["m5000", "За метры: 5000 м"], ["e_stone", "Эпический: Каменная корона"], ["e_ice", "Эпический: Ледяная"], ["e_wood", "Эпический: Лесной фонарь"], ["e_vines", "Эпический: Цветущая лоза"], ["e_tech", "Эпический: Техно"], ["e_trophy", "Эпический: Чемпион"], ["e_lava", "Эпический: Лава"], ["e_void", "Эпический: Пустота"], ["e_hallow", "Эпический: Хэллоуин"], ["e_space", "Эпический: Космос"], ["dev", "Разработчик (только пульт)"]], "pet": [["cat", "Котик"], ["pigeon", "Голубь"], ["slime", "Слизень"], ["dragon", "Дракончик (леги)"], ["phoenix", "Феникс (леги)"], ["ufo", "НЛО (леги)"]], "mat": [["0", "Гайка"], ["1", "Шестерёнка"], ["2", "Кристалл"], ["3", "Перо феникса"], ["4", "Звёздная пыль"]]};
+const KIND_NAME = { skin: 'Скин', title: 'Титул', frame: 'Рамка', pet: 'Питомец', bg: 'Фон', sound: 'Звук', trail: 'Дорожка', map: 'Карта' };
 const $ = id => document.getElementById(id);
 const toast = (m, bad) => { const t = $('toast'); t.textContent = m; t.className = 'on ' + (bad ? 'bad' : 'ok'); clearTimeout(toast.h); toast.h = setTimeout(() => t.className = '', 2600); };
 const err = e => { console.error(e); toast('Ошибка: ' + (e && e.code === 'permission-denied' ? 'нет доступа (проверь почту в правилах)' : (e && e.message || e)), true); };
@@ -171,6 +178,7 @@ function fillKinds(kSel, iSel) {
   kSel.onchange = fill; fill();
 }
 fillKinds($('pKind'), $('pItem')); fillKinds($('gKind'), $('gItem'));
+$('pMat').innerHTML = CAT.mat.map(m => `<option value="${m[0]}">${m[1]}</option>`).join('');
 
 /* ---------- вход ---------- */
 $('lGo').onclick = async () => {
@@ -229,7 +237,7 @@ function renderPlayer() {
   const nm = document.createElement('div'); nm.className = 'nm'; nm.textContent = (p.nick || '?') + ' · ID ' + cur.pid;
   if (cur.ban) { const b = document.createElement('span'); b.className = 'ban'; b.textContent = 'БАН'; nm.appendChild(b); }
   const meta = document.createElement('div'); meta.className = 'meta';
-  meta.textContent = `Рекорд ${p.best || 0} м · забегов ${p.runs || 0} · падений ${p.falls || 0} · наиграно ${fmtH(p.sec)} · скин «${nameOf('skin', p.skin)}»` + (p.title ? ` · титул «${nameOf('title', p.title)}»` : '') + ` · был: ${ago(upd)}` + (p.v ? ` · версия ${p.v}` : '') + (cur.ban && cur.ban.why ? ` · причина бана: ${cur.ban.why}` : '');
+  meta.textContent = (p.fr ? `Рамка «${nameOf('frame', p.fr)}» · ` : '') + (p.pet ? `Питомец «${nameOf('pet', p.pet)}» · ` : '') + `Рекорд ${p.best || 0} м · забегов ${p.runs || 0} · падений ${p.falls || 0} · наиграно ${fmtH(p.sec)} · скин «${nameOf('skin', p.skin)}»` + (p.title ? ` · титул «${nameOf('title', p.title)}»` : '') + ` · был: ${ago(upd)}` + (p.v ? ` · версия ${p.v}` : '') + (cur.ban && cur.ban.why ? ` · причина бана: ${cur.ban.why}` : '');
   $('pCard').append(nm, meta); $('pBox').classList.remove('hidden');
 }
 on('fGo', findPlayer);
@@ -242,6 +250,10 @@ on('pTake', async () => { need(); const v = num('pCoins'); await send({ t: 'coin
 on('pZero', async () => { need(); if (!confirm('Обнулить весь баланс игрока ' + cur.pid + '?')) return; await send({ t: 'coinsSet', v: 0 }); toast('Баланс будет обнулён'); });
 on('pItemGive', async () => { need(); await send({ t: 'item', k: $('pKind').value, id: $('pItem').value }); toast('Выдано: ' + KIND_NAME[$('pKind').value] + ' «' + nameOf($('pKind').value, $('pItem').value) + '»'); });
 on('pItemTake', async () => { need(); await send({ t: 'take', k: $('pKind').value, id: $('pItem').value }); toast('Предмет будет забран'); });
+on('pMatGive', async () => { need(); const v = num('pMatN'); await send({ t: 'mat', k: +$('pMat').value, v }); toast('Выдано деталей: ' + v + ' × ' + CAT.mat[+$('pMat').value][1]); });
+on('pMatTake', async () => { need(); const v = num('pMatN'); await send({ t: 'mat', k: +$('pMat').value, v: -v }); toast('Списано деталей: ' + v); });
+on('pAll', async () => { need(); if (!confirm('Выдать игроку ' + cur.pid + ' ВСЕ предметы игры? (кроме рамки разработчика и титула «Админ»)')) return; await send({ t: 'all' }); toast('Всё выдано — придёт при входе'); });
+on('pMatAll', async () => { need(); const v = num('pMatN'); await send({ t: 'matAll', v }); toast('Выдано по ' + v + ' каждой детали'); });
 on('pShGive', async () => { need(); const v = num('pSh'); await send({ t: 'shields', v }); toast('Выдано щитов: ' + v); });
 on('pMsg', async () => { need(); if (!$('pText').value.trim()) throw new Error('Напиши текст сообщения'); await send({ t: 'msg' }); toast('Сообщение отправлено'); });
 on('pRec', async () => {
@@ -271,7 +283,7 @@ async function loadCfg() {
   const now = Date.now(), g = cfg.gift, a = cfg.ann, e = cfg.ev;
   $('gNow').innerHTML = ''; $('aNow').innerHTML = ''; $('eNow').innerHTML = '';
   const box = (id, txt) => { const d = document.createElement('div'); d.className = 'now'; d.textContent = txt; $(id).appendChild(d); };
-  if (g && g.id && now < g.until) box('gNow', `Сейчас: «${g.text || 'подарок'}» · ${g.coins || 0} махмудиков` + ((g.items || []).length ? ' + ' + g.items.map(q => nameOf(q.k, q.id)).join(', ') : '') + ` · до ${fmtD(g.until)}`);
+  if (g && g.id && now < g.until) box('gNow', `Сейчас: «${g.text || 'подарок'}» · ${g.coins || 0} махмудиков` + (g.mats ? ` · по ${g.mats} каждой детали` : '') + ((g.items || []).length ? ' + ' + g.items.map(q => nameOf(q.k, q.id)).join(', ') : '') + ` · до ${fmtD(g.until)}`);
   if (a && a.id && now < a.until) box('aNow', `Сейчас: «${a.text}» · до ${fmtD(a.until)}`);
   if (e && e.id && now < e.end) box('eNow', (now < e.start ? `Запланирован: «${e.name}» — старт через ${left(e.start - now)}` : `Идёт: «${e.name}» — осталось ${left(e.end - now)}`) + ` · ${fmtD(e.start)} → ${fmtD(e.end)} · ×${e.mul}` + (e.gift ? ` · подарок ${e.gift}` : ''));
 }
@@ -280,10 +292,10 @@ let gItems = [];
 const drawGItems = () => { $('gItems').innerHTML = ''; gItems.forEach((q, i) => { const c = document.createElement('span'); c.className = 'chip'; c.textContent = KIND_NAME[q.k] + ' «' + nameOf(q.k, q.id) + '»'; const x = document.createElement('i'); x.textContent = '✕'; x.onclick = () => { gItems.splice(i, 1); drawGItems(); }; c.appendChild(x); $('gItems').appendChild(c); }); };
 $('gAdd').onclick = () => { const q = { k: $('gKind').value, id: $('gItem').value }; if (!gItems.some(x => x.k === q.k && x.id === q.id)) gItems.push(q); drawGItems(); };
 on('gSend', async () => {
-  const coins = Math.max(0, Math.round(+$('gCoins').value || 0)); if (!coins && !gItems.length) throw new Error('Укажи махмудики или предметы');
+  const coins = Math.max(0, Math.round(+$('gCoins').value || 0)), mats = Math.max(0, Math.round(+$('gMats').value || 0)); if (!coins && !gItems.length && !mats) throw new Error('Укажи махмудики, детали или предметы');
   const days = Math.max(0.05, +$('gDays').value || 7);
   if (!confirm('Отправить подарок ВСЕМ игрокам?')) return;
-  await setCfg({ gift: { id: 'g' + Date.now(), coins, items: gItems, text: $('gText').value.trim(), from: 0, until: Date.now() + days * 864e5 } });
+  await setCfg({ gift: { id: 'g' + Date.now(), coins, mats, items: gItems, text: $('gText').value.trim(), from: 0, until: Date.now() + days * 864e5 } });
   gItems = []; drawGItems(); toast('Подарок отправлен всем'); loadCfg();
 });
 on('gOff', async () => { await setCfg({ gift: deleteField() }); toast('Подарок отменён'); loadCfg(); });
