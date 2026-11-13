@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="ru"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Пульт</title>
+<style>
+:root{--bg:#0b0e24;--card:#161b3e;--card2:#1e2552;--line:rgba(255,255,255,.12);--txt:#eef1ff;--mut:#9aa3d0;--gold:#ffd23a;--grn:#2fd06b;--red:#ff4d5e;--blu:#3d8bff}
+*{box-sizing:border-box}
+html{background:var(--bg)}
+body{margin:0;background:radial-gradient(120% 60% at 50% 0,#1c2463,var(--bg) 60%);background-attachment:fixed;color:var(--txt);font:15px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding:14px 16px 60px;min-height:100vh}
+h1{font-size:22px;color:#fff;margin:4px 0 14px;display:flex;align-items:center;gap:10px}
+h1 small{font-size:13px;color:var(--mut);font-weight:600;margin-left:auto}
+h2{font-size:17px;margin:0 0 10px;display:flex;align-items:center;gap:8px}
+.card{background:linear-gradient(var(--card2),var(--card));border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:14px;box-shadow:0 6px 20px rgba(0,0,0,.35)}
+label{display:block;font-size:12px;color:var(--mut);font-weight:700;margin:8px 0 4px;text-transform:uppercase;letter-spacing:.04em}
+input,select,textarea{width:100%;background:#0a0d22;color:var(--txt);border:1px solid var(--line);border-radius:10px;padding:10px 11px;font:inherit;outline:none}
+input:focus,select:focus,textarea:focus{border-color:var(--blu)}
+textarea{min-height:64px;resize:vertical}
+.row{display:flex;gap:8px;flex-wrap:wrap}.row>*{flex:1 1 120px}
+button{font:inherit;font-weight:800;border:0;border-radius:11px;padding:11px 14px;cursor:pointer;color:#fff;background:var(--blu);box-shadow:0 3px 0 rgba(0,0,0,.35)}
+button:active{transform:translateY(2px);box-shadow:none}
+button.g{background:var(--grn)}button.r{background:var(--red)}button.y{background:var(--gold);color:#2a1c00}button.k{background:#39406e}
+button:disabled{opacity:.5}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.btns button{flex:1 1 130px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px}
+.st{background:rgba(0,0,0,.25);border:1px solid var(--line);border-radius:12px;padding:10px;text-align:center}
+.st b{display:block;font-size:22px;color:var(--gold)}.st span{font-size:12px;color:var(--mut);font-weight:700}
+.pl{background:rgba(0,0,0,.25);border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:10px}
+.pl .nm{font-size:20px;font-weight:900}.pl .meta{color:var(--mut);font-size:13px;margin-top:3px}
+.ban{display:inline-block;background:var(--red);color:#fff;border-radius:8px;padding:1px 8px;font-size:12px;font-weight:800;margin-left:6px}
+.sub{border-top:1px dashed var(--line);margin-top:12px;padding-top:4px}
+.hint{color:var(--mut);font-size:13px;margin-top:6px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.chip{background:#2a3266;border-radius:20px;padding:4px 10px;font-size:13px;font-weight:700;display:flex;gap:6px;align-items:center}.chip i{cursor:pointer;font-style:normal;color:var(--red)}
+.now{background:rgba(0,0,0,.25);border-left:4px solid var(--gold);border-radius:8px;padding:8px 10px;margin-bottom:8px;font-size:14px}
+table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:7px 5px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}th{color:var(--mut);font-size:11px;text-transform:uppercase}
+.tw{overflow-x:auto;max-height:60vh;overflow-y:auto;margin-top:8px}
+tr.click{cursor:pointer}tr.click:hover{background:rgba(255,255,255,.05)}
+#toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(120px);background:#0a0d22;border:1px solid var(--line);color:#fff;padding:11px 16px;border-radius:12px;font-weight:700;transition:.25s;z-index:9;max-width:92vw;box-shadow:0 8px 24px rgba(0,0,0,.5)}
+#toast.on{transform:translateX(-50%)}#toast.bad{border-color:var(--red)}#toast.ok{border-color:var(--grn)}
+.hidden{display:none!important}
+.login{max-width:380px;margin:12vh auto 0}
+details>summary{list-style:none;cursor:pointer}details>summary::-webkit-details-marker{display:none}
+details>summary h2::after{content:"▾";margin-left:auto;color:var(--mut)}details[open]>summary h2::after{content:"▴"}
+details[open]>summary h2{margin-bottom:10px}details>summary h2{margin:0}
+</style></head>
+<body>
+<div id="vLogin" class="login card">
+  <h2>🔐 Вход</h2>
+  <label>Почта</label><input id="lEmail" type="email" autocomplete="username">
+  <label>Пароль</label><input id="lPass" type="password" autocomplete="current-password">
+  <div class="btns"><button id="lGo" class="g">Войти</button></div>
+  <div id="lErr" class="hint"></div>
+</div>
+
+<div id="vMain" class="hidden">
+  <h1>🎮 Стенопрыг · пульт <small id="who"></small></h1>
+
+  <details class="card" open><summary><h2>📊 Статистика</h2></summary>
+    <div id="stats" class="stats"></div>
+    <div class="btns"><button id="stRefresh" class="k">Обновить</button></div>
+  </details>
+
+  <details class="card" open><summary><h2>👤 Игрок по ID</h2></summary>
+    <div class="row"><input id="fId" type="number" inputmode="numeric" placeholder="ID игрока, например 7"><button id="fGo" style="flex:0 0 auto">Найти</button></div>
+    <div id="pBox" class="hidden">
+      <div id="pCard" class="pl"></div>
+      <div class="sub">
+        <label>Текст, который увидит игрок (необязательно)</label>
+        <input id="pText" placeholder="например: За победу в турнире">
+      </div>
+      <div class="sub">
+        <label>Махмудики</label>
+        <input id="pCoins" type="number" inputmode="numeric" placeholder="сколько">
+        <div class="btns"><button id="pGive" class="g">＋ Выдать</button><button id="pTake" class="r">− Списать</button><button id="pZero" class="r">Обнулить баланс</button></div>
+      </div>
+      <div class="sub">
+        <label>Предметы (скины, титулы, рамки, питомцы, фоны и всё остальное)</label>
+        <div class="row"><select id="pKind"></select><select id="pItem"></select></div>
+        <div class="btns"><button id="pItemGive" class="g">Выдать предмет</button><button id="pItemTake" class="r">Забрать</button></div>
+        <div class="btns"><button id="pAll" class="y">🎁 Выдать ВСЁ (все предметы игры)</button></div>
+      </div>
+      <div class="sub">
+        <label>Детали для крафта</label>
+        <div class="row"><select id="pMat"></select><input id="pMatN" type="number" inputmode="numeric" placeholder="сколько"></div>
+        <div class="btns"><button id="pMatGive" class="g">＋ Выдать детали</button><button id="pMatTake" class="r">− Списать</button><button id="pMatAll" class="g">＋ Каждой детали</button></div>
+      </div>
+      <div class="sub">
+        <label>Щиты колеса</label>
+        <div class="row"><input id="pSh" type="number" inputmode="numeric" placeholder="сколько щитов"><button id="pShGive" class="g" style="flex:0 0 auto">Выдать</button></div>
+      </div>
+      <div class="sub">
+        <label>Личное сообщение (текст сверху)</label>
+        <div class="btns"><button id="pMsg">✉️ Отправить только сообщение</button></div>
+      </div>
+      <div class="sub">
+        <label>Рекорд</label>
+        <div class="btns"><button id="pRec" class="r">🧹 Удалить рекорд</button></div>
+      </div>
+      <div class="sub">
+        <label>Бан</label>
+        <input id="pWhy" placeholder="причина (необязательно)">
+        <div class="btns"><button id="pBan" class="r">⛔ Забанить</button><button id="pUnban" class="g">Разбанить</button></div>
+      </div>
+    </div>
+  </details>
+
+  <details class="card"><summary><h2>🎁 Подарок всем</h2></summary>
+    <div id="gNow"></div>
+    <label>Махмудики каждому</label><input id="gCoins" type="number" inputmode="numeric" placeholder="например 1000">
+    <label>Предметы (необязательно)</label>
+    <div class="row"><select id="gKind"></select><select id="gItem"></select><button id="gAdd" class="k" style="flex:0 0 auto">＋</button></div>
+    <div id="gItems" class="chips"></div>
+    <label>Детали для крафта каждому (по столько каждой детали)</label><input id="gMats" type="number" inputmode="numeric" placeholder="например 5">
+    <label>Текст подарка</label><input id="gText" placeholder="+1000 С НГ 🎄">
+    <label>Сколько дней можно получить</label><input id="gDays" type="number" value="7">
+    <div class="btns"><button id="gSend" class="y">🎁 Отправить всем</button><button id="gOff" class="k">Отменить подарок</button></div>
+    <div class="hint">Каждый игрок получит подарок один раз — при следующем входе в игру.</div>
+  </details>
+
+  <details class="card"><summary><h2>📢 Объявление</h2></summary>
+    <div id="aNow"></div>
+    <label>Текст</label><textarea id="aText" placeholder="Например: завтра в 18:00 турнир на рекорд!"></textarea>
+    <label>Показывать дней</label><input id="aDays" type="number" value="3">
+    <div class="btns"><button id="aSend" class="y">📢 Опубликовать</button><button id="aOff" class="k">Убрать</button></div>
+    <div class="hint">Каждый увидит объявление один раз.</div>
+  </details>
+
+  <details class="card"><summary><h2>🎉 Ивент</h2></summary>
+    <div id="eNow"></div>
+    <label>Название</label><input id="eName" placeholder="Двойные махмудики">
+    <label>Текст на плашке в меню</label><input id="eBanner" placeholder="Двойные махмудики на все забеги!">
+    <div class="row">
+      <div><label>Начало (твоё время)</label><input id="eStart" type="datetime-local"></div>
+      <div><label>Длится, дней</label><input id="eDays" type="number" value="2" step="any"></div>
+      <div><label>и часов</label><input id="eHours" type="number" value="0" step="any"></div>
+    </div>
+    <div class="row">
+      <div><label>Множитель махмудиков</label><select id="eMul"><option value="1">×1 (без множителя)</option><option value="1.5">×1.5</option><option value="2" selected>×2</option><option value="3">×3</option><option value="5">×5</option></select></div>
+      <div><label>Подарок за вход</label><input id="eGift" type="number" value="0"></div>
+      <div><label>Цвет плашки</label><input id="eColor" type="color" value="#ff6fd8" style="height:44px;padding:4px"></div>
+    </div>
+    <div id="ePrev" class="hint"></div>
+    <div class="btns"><button id="eSend" class="y">🎉 Запланировать</button><button id="eOff" class="k">Отменить ивент</button></div>
+    <div class="hint">Ивент начнётся и закончится сам — обновлять игру не нужно. За неделю до старта в меню видно «⏳ через …».</div>
+  </details>
+
+  <details class="card"><summary><h2>📋 Все игроки</h2></summary>
+    <input id="tFind" placeholder="поиск по нику или ID">
+    <div class="tw"><table><thead><tr><th>ID</th><th>Ник</th><th>Рекорд</th><th>Забеги</th><th>Часы</th><th>Был</th></tr></thead><tbody id="tBody"></tbody></table></div>
+  </details>
+  <div class="btns"><button id="out" class="k">Выйти</button></div>
+</div>
+<div id="toast"></div>
+
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+import { getFirestore, collection, query, where, getDocs, doc, getDoc, setDoc, deleteDoc, addDoc, updateDoc, writeBatch, serverTimestamp, deleteField } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+
+const app = initializeApp({ apiKey: 'AIzaSyA9nA7lvW_y8EeRMLgPumjx2-Iz3OQv-Rw', authDomain: 'stenojump.firebaseapp.com', projectId: 'stenojump' });
+const auth = getAuth(app), db = getFirestore(app);
+const CAT = {"skin": [["classic", "Классик"], ["ninja", "Ниндзя"], ["cool", "Крутой"], ["ping", "Пинг 999"], ["ragged", "Рваный"], ["shock", "Шок"], ["licker", "Лизун"], ["blackhand", "Чёрная рука"], ["kuryaga", "Куряга"], ["sosed", "Сосед"], ["scare", "Испуг"], ["diamond", "Алмазный"], ["emerald", "Изумрудный"], ["demon", "Демон"], ["ghost", "Призрак"], ["astro", "Космонавт"], ["cyborg", "Киборг"], ["worm", "Червь"]], "bg": [["clouds", "Ночное небо"], ["yard", "Зимний двор"], ["rex", "Рекс с газетой"], ["kfc", "Рекс в футболке"], ["money", "Деньги"], ["r67", "Кролик 67"], ["city", "Ночной город"], ["sakura", "Ночная сакура"], ["sunset", "Закат в поле"], ["camo", "Камуфляж"], ["snow", "Снежная ночь"], ["stripes", "Три полоски"], ["mono", "Монограмма"], ["cat", "Кот на районе"], ["paris", "Париж ночью"], ["ender", "Эндер"], ["fr_shop", "У магазина"], ["fr_pyramid", "Пирамида"], ["fr_tree", "Ночная компания"], ["c_aurora", "Сияние в горах (крафт)"], ["c_neon", "Неоновый мегаполис (крафт)"], ["c_marble", "Мрамор (крафт)"]], "sound": [["classic", "Классика"], ["meme", "Мем-микс"], ["pink", "Розовый хит"], ["amber", "Янтарный хит"], ["fire", "У костра"], ["ice", "Ледяной бас"], ["xphonk", "Фонк-ночь"], ["xfunk", "Фанк-сюрприз"], ["xjump", "Джампстайл"], ["xsneak", "Хитрый вор"], ["xneon", "Неоновый хит"], ["xshaggy", "Танец Шэгги"], ["xkisa", "Прыгай, киса"], ["xlala", "Ла-ла-ла"], ["france", "Франсе"], ["night", "Ночной город"]], "trail": [["dots", "Точки"], ["fire", "Огонь"], ["neon", "Неон"], ["stars", "Звёзды"], ["ice", "Лёд"], ["rainbow", "Радуга"], ["bolt", "Молния"], ["galaxy", "Галактика"], ["confetti", "Конфетти"], ["goldrain", "Золотой дождь"], ["aurora", "Северное сияние"], ["butterfly", "Волшебные бабочки"], ["notes", "Ноты"], ["phoenix", "Пламя феникса"], ["bubbles", "Мыльные пузыри"], ["c_hearts", "Сердца (крафт)"], ["c_neontr", "Неоновый след (крафт)"], ["c_starfall", "Звездопад (крафт)"], ["c_darkfire", "Чёрное пламя (крафт)"]], "map": [["brick", "Кирпичи"], ["ice", "Ледяная пещера"], ["lava", "Вулкан"], ["jungle", "Джунгли"], ["space", "Космостанция"], ["desert", "Пустыня"], ["gold", "Золотой дворец"], ["crystal", "Кристальная пещера"], ["matrix", "Матрица"], ["candy", "Конфетная страна"], ["rainbow", "Радужные облака"], ["ocean", "Подводный мир"], ["c_jungle", "Заросшие руины (крафт)"], ["c_station", "Орбитальная станция (крафт)"], ["c_desert", "Храм в пустыне (крафт)"], ["c_glitch", "Глитч (крафт)"]], "title": [["t_pens", "На пенсии"], ["t_krut", "Крутышка"], ["t_rasklad", "Какой расклад?"], ["t_odin", "Один такой"], ["t_kras", "Красавчик"], ["t_serd", "Сердцеед"], ["t_boss", "Босс"], ["t_dikiy", "Дикий"], ["t_bezb", "Без башни"], ["t_zakon", "Я тут закон!"], ["t_krov", "Жажда крови"], ["t_snip", "Снайпер"], ["t_levoy", "Одной левой!"], ["t_sorvi", "Сорвиголова"], ["t_leg", "Легенда"], ["t_vozd", "Воздухан"], ["t_glino", "Глиномес"], ["t_alhim", "Алхимик (крафт)"], ["t_tvor", "Творец (крафт)"], ["t_admin", "Админ (невозможный)"]], "frame": [["m500", "За метры: 500 м"], ["m1000", "За метры: 1000 м"], ["m1500", "За метры: 1500 м"], ["m2000", "За метры: 2000 м"], ["m2500", "За метры: 2500 м"], ["m3000", "За метры: 3000 м"], ["m3500", "За метры: 3500 м"], ["m4000", "За метры: 4000 м"], ["m4500", "За метры: 4500 м"], ["m5000", "За метры: 5000 м"], ["e_stone", "Эпический: Каменная корона"], ["e_ice", "Эпический: Ледяная"], ["e_wood", "Эпический: Лесной фонарь"], ["e_vines", "Эпический: Цветущая лоза"], ["e_tech", "Эпический: Техно"], ["e_trophy", "Эпический: Чемпион"], ["e_lava", "Эпический: Лава"], ["e_void", "Эпический: Пустота"], ["e_hallow", "Эпический: Хэллоуин"], ["e_space", "Эпический: Космос"], ["dev", "Разработчик (только пульт)"]], "pet": [["cat", "Котик"], ["pigeon", "Голубь"], ["slime", "Слизень"], ["dragon", "Дракончик (леги)"], ["phoenix", "Феникс (леги)"], ["ufo", "НЛО (леги)"]], "mat": [["0", "Гайка"], ["1", "Шестерёнка"], ["2", "Кристалл"], ["3", "Перо феникса"], ["4", "Звёздная пыль"]]};
+const KIND_NAME = { skin: 'Скин', title: 'Титул', frame: 'Рамка', pet: 'Питомец', bg: 'Фон', sound: 'Звук', trail: 'Дорожка', map: 'Карта' };
+const $ = id => document.getElementById(id);
+const toast = (m, bad) => { const t = $('toast'); t.textContent = m; t.className = 'on ' + (bad ? 'bad' : 'ok'); clearTimeout(toast.h); toast.h = setTimeout(() => t.className = '', 2600); };
+const err = e => { console.error(e); toast('Ошибка: ' + (e && e.code === 'permission-denied' ? 'нет доступа (проверь почту в правилах)' : (e && e.message || e)), true); };
+const nameOf = (k, id) => { const r = (CAT[k] || []).find(x => x[0] === id); return r ? r[1] : id; };
+const fmtH = s => (Math.round((s || 0) / 360) / 10) + ' ч';
+const ago = ms => { if (!ms) return '—'; const m = Math.floor((Date.now() - ms) / 60000); return m < 2 ? 'сейчас' : m < 60 ? m + ' мин' : m < 1440 ? Math.floor(m / 60) + ' ч' : Math.floor(m / 1440) + ' дн'; };
+const fmtD = ms => new Date(ms).toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+const left = ms => { const m = Math.max(0, Math.floor(ms / 60000)); return Math.floor(m / 1440) + 'д ' + Math.floor(m % 1440 / 60) + 'ч ' + m % 60 + 'м'; };
+const busy = async (btn, fn) => { btn.disabled = true; try { await fn(); } catch (e) { err(e); } btn.disabled = false; };
+const on = (id, fn) => $(id).addEventListener('click', e => busy(e.currentTarget, fn));
+
+function fillKinds(kSel, iSel) {
+  kSel.innerHTML = Object.keys(KIND_NAME).map(k => `<option value="${k}">${KIND_NAME[k]}</option>`).join('');
+  const fill = () => { iSel.innerHTML = ''; (CAT[kSel.value] || []).forEach(([id, n]) => { const o = document.createElement('option'); o.value = id; o.textContent = n; iSel.appendChild(o); }); };
+  kSel.onchange = fill; fill();
+}
+fillKinds($('pKind'), $('pItem')); fillKinds($('gKind'), $('gItem'));
+$('pMat').innerHTML = CAT.mat.map(m => `<option value="${m[0]}">${m[1]}</option>`).join('');
+
+/* ---------- вход ---------- */
+$('lGo').onclick = async () => {
+  $('lErr').textContent = '';
+  try { await signInWithEmailAndPassword(auth, $('lEmail').value.trim(), $('lPass').value); }
+  catch (e) { $('lErr').textContent = e.code === 'auth/invalid-credential' || e.code === 'auth/wrong-password' || e.code === 'auth/user-not-found' ? 'Неверная почта или пароль' : e.code === 'auth/too-many-requests' ? 'Слишком много попыток, подожди' : 'Ошибка: ' + e.code; }
+};
+$('lPass').addEventListener('keydown', e => { if (e.key === 'Enter') $('lGo').click(); });
+$('out').onclick = () => signOut(auth);
+onAuthStateChanged(auth, u => {
+  $('vLogin').classList.toggle('hidden', !!u); $('vMain').classList.toggle('hidden', !u);
+  if (u) { $('who').textContent = u.email; loadAll(); }
+});
+
+/* ---------- данные ---------- */
+let players = [], cfg = {};
+async function loadAll() { await Promise.all([loadPlayers(), loadCfg()]).catch(err); }
+async function loadPlayers() {
+  const s = await getDocs(collection(db, 'players'));
+  players = s.docs.map(d => { const o = d.data(); o._uid = d.id; o._upd = o.upd && o.upd.toMillis ? o.upd.toMillis() : 0; return o; }).sort((a, b) => (b.best || 0) - (a.best || 0));
+  const now = Date.now(), act = h => players.filter(p => now - p._upd < h * 3600e3).length;
+  const sum = k => players.reduce((a, p) => a + (p[k] || 0), 0);
+  let bansN = 0; try { bansN = (await getDocs(collection(db, 'bans'))).size; } catch (e) {}
+  const st = [['Игроков', players.length], ['Онлайн за 24 ч', act(24)], ['За 7 дней', act(168)], ['Всего забегов', sum('runs')], ['Падений', sum('falls')], ['Наиграно', Math.round(sum('sec') / 3600) + ' ч'], ['Лучший рекорд', (players[0] ? players[0].best : 0) + ' м'], ['В бане', bansN]];
+  $('stats').innerHTML = st.map(([a, b]) => `<div class="st"><b>${b}</b><span>${a}</span></div>`).join('');
+  renderTable();
+}
+function renderTable() {
+  const q = $('tFind').value.trim().toLowerCase();
+  const rows = players.filter(p => !q || String(p.pid) === q || String(p.nick || '').toLowerCase().includes(q));
+  const tb = $('tBody'); tb.innerHTML = '';
+  rows.forEach(p => { const tr = document.createElement('tr'); tr.className = 'click';
+    [p.pid, p.nick, (p.best || 0) + ' м', p.runs || 0, fmtH(p.sec), ago(p._upd)].forEach(v => { const td = document.createElement('td'); td.textContent = v; tr.appendChild(td); });
+    tr.onclick = () => { $('fId').value = p.pid; findPlayer(); window.scrollTo({ top: 0, behavior: 'smooth' }); }; tb.appendChild(tr); });
+}
+$('tFind').oninput = renderTable;
+on('stRefresh', loadPlayers);
+
+/* ---------- игрок ---------- */
+let cur = null;   /* { uid, pid, data, ban } */
+async function findPlayer() {
+  const pid = parseInt($('fId').value, 10); if (!(pid > 0)) return toast('Введи ID', true);
+  const s = await getDocs(query(collection(db, 'players'), where('pid', '==', pid)));
+  let uid = null, data = null;
+  if (!s.empty) { uid = s.docs[0].id; data = s.docs[0].data(); }
+  let ban = null;
+  const bs = await getDocs(query(collection(db, 'bans'), where('pid', '==', pid)));
+  if (!bs.empty) { ban = bs.docs[0].data(); if (!uid) { uid = bs.docs[0].id; data = ban.snap || { pid: pid, nick: ban.nick || '?' }; } }
+  if (!uid) { $('pBox').classList.add('hidden'); cur = null; return toast('Игрок с ID ' + pid + ' не найден (он ещё не заходил в игру с интернетом)', true); }
+  cur = { uid, pid, data, ban };
+  renderPlayer();
+}
+function renderPlayer() {
+  const p = cur.data, upd = p.upd && p.upd.toMillis ? p.upd.toMillis() : 0;
+  $('pCard').innerHTML = '';
+  const nm = document.createElement('div'); nm.className = 'nm'; nm.textContent = (p.nick || '?') + ' · ID ' + cur.pid;
+  if (cur.ban) { const b = document.createElement('span'); b.className = 'ban'; b.textContent = 'БАН'; nm.appendChild(b); }
+  const meta = document.createElement('div'); meta.className = 'meta';
+  meta.textContent = (p.fr ? `Рамка «${nameOf('frame', p.fr)}» · ` : '') + (p.pet ? `Питомец «${nameOf('pet', p.pet)}» · ` : '') + `Рекорд ${p.best || 0} м · забегов ${p.runs || 0} · падений ${p.falls || 0} · наиграно ${fmtH(p.sec)} · скин «${nameOf('skin', p.skin)}»` + (p.title ? ` · титул «${nameOf('title', p.title)}»` : '') + ` · был: ${ago(upd)}` + (p.v ? ` · версия ${p.v}` : '') + (cur.ban && cur.ban.why ? ` · причина бана: ${cur.ban.why}` : '');
+  $('pCard').append(nm, meta); $('pBox').classList.remove('hidden');
+}
+on('fGo', findPlayer);
+$('fId').addEventListener('keydown', e => { if (e.key === 'Enter') $('fGo').click(); });
+const need = () => { if (!cur) throw new Error('Сначала найди игрока'); };
+const send = (o) => addDoc(collection(db, 'inbox', cur.uid, 'items'), Object.assign({ text: $('pText').value.trim(), at: serverTimestamp() }, o));
+const num = id => { const v = Math.round(+$(id).value); if (!(v > 0)) throw new Error('Введи число больше 0'); return v; };
+on('pGive', async () => { need(); const v = num('pCoins'); await send({ t: 'coins', v }); toast('Выдано +' + v + ' — придёт при входе в игру'); });
+on('pTake', async () => { need(); const v = num('pCoins'); await send({ t: 'coins', v: -v }); toast('Списано ' + v); });
+on('pZero', async () => { need(); if (!confirm('Обнулить весь баланс игрока ' + cur.pid + '?')) return; await send({ t: 'coinsSet', v: 0 }); toast('Баланс будет обнулён'); });
+on('pItemGive', async () => { need(); await send({ t: 'item', k: $('pKind').value, id: $('pItem').value }); toast('Выдано: ' + KIND_NAME[$('pKind').value] + ' «' + nameOf($('pKind').value, $('pItem').value) + '»'); });
+on('pItemTake', async () => { need(); await send({ t: 'take', k: $('pKind').value, id: $('pItem').value }); toast('Предмет будет забран'); });
+on('pMatGive', async () => { need(); const v = num('pMatN'); await send({ t: 'mat', k: +$('pMat').value, v }); toast('Выдано деталей: ' + v + ' × ' + CAT.mat[+$('pMat').value][1]); });
+on('pMatTake', async () => { need(); const v = num('pMatN'); await send({ t: 'mat', k: +$('pMat').value, v: -v }); toast('Списано деталей: ' + v); });
+on('pAll', async () => { need(); if (!confirm('Выдать игроку ' + cur.pid + ' ВСЕ предметы игры? (кроме рамки разработчика и титула «Админ»)')) return; await send({ t: 'all' }); toast('Всё выдано — придёт при входе'); });
+on('pMatAll', async () => { need(); const v = num('pMatN'); await send({ t: 'matAll', v }); toast('Выдано по ' + v + ' каждой детали'); });
+on('pShGive', async () => { need(); const v = num('pSh'); await send({ t: 'shields', v }); toast('Выдано щитов: ' + v); });
+on('pMsg', async () => { need(); if (!$('pText').value.trim()) throw new Error('Напиши текст сообщения'); await send({ t: 'msg' }); toast('Сообщение отправлено'); });
+on('pRec', async () => {
+  need(); if (!confirm('Удалить рекорд игрока ' + cur.pid + '?')) return;
+  const b = writeBatch(db);
+  if (!cur.ban) b.update(doc(db, 'players', cur.uid), { best: 0 });
+  b.set(doc(collection(db, 'inbox', cur.uid, 'items')), { t: 'resetBest', text: $('pText').value.trim(), at: serverTimestamp() });
+  await b.commit(); cur.data.best = 0; renderPlayer(); toast('Рекорд удалён'); loadPlayers();
+});
+on('pBan', async () => {
+  need(); if (cur.ban) return toast('Уже в бане', true);
+  if (!confirm('Забанить игрока ' + cur.pid + ' (' + (cur.data.nick || '?') + ')?')) return;
+  const snap = Object.assign({}, cur.data); delete snap.upd;
+  const b = writeBatch(db);
+  b.set(doc(db, 'bans', cur.uid), { pid: cur.pid, nick: cur.data.nick || '', why: $('pWhy').value.trim(), snap, at: serverTimestamp() });
+  b.delete(doc(db, 'players', cur.uid));   /* пропадает из таблицы лидеров */
+  await b.commit(); cur.ban = { why: $('pWhy').value.trim() }; renderPlayer(); toast('Игрок забанен'); loadPlayers();
+});
+on('pUnban', async () => {
+  need(); if (!cur.ban) return toast('Игрок не в бане', true);
+  await deleteDoc(doc(db, 'bans', cur.uid)); cur.ban = null; renderPlayer(); toast('Разбанен — вернётся в таблицу при следующем входе'); loadPlayers();
+});
+
+/* ---------- общий конфиг ---------- */
+async function loadCfg() {
+  const s = await getDoc(doc(db, 'config', 'global')); cfg = s.exists() ? s.data() : {};
+  const now = Date.now(), g = cfg.gift, a = cfg.ann, e = cfg.ev;
+  $('gNow').innerHTML = ''; $('aNow').innerHTML = ''; $('eNow').innerHTML = '';
+  const box = (id, txt) => { const d = document.createElement('div'); d.className = 'now'; d.textContent = txt; $(id).appendChild(d); };
+  if (g && g.id && now < g.until) box('gNow', `Сейчас: «${g.text || 'подарок'}» · ${g.coins || 0} махмудиков` + (g.mats ? ` · по ${g.mats} каждой детали` : '') + ((g.items || []).length ? ' + ' + g.items.map(q => nameOf(q.k, q.id)).join(', ') : '') + ` · до ${fmtD(g.until)}`);
+  if (a && a.id && now < a.until) box('aNow', `Сейчас: «${a.text}» · до ${fmtD(a.until)}`);
+  if (e && e.id && now < e.end) box('eNow', (now < e.start ? `Запланирован: «${e.name}» — старт через ${left(e.start - now)}` : `Идёт: «${e.name}» — осталось ${left(e.end - now)}`) + ` · ${fmtD(e.start)} → ${fmtD(e.end)} · ×${e.mul}` + (e.gift ? ` · подарок ${e.gift}` : ''));
+}
+const setCfg = o => setDoc(doc(db, 'config', 'global'), o, { merge: true });
+let gItems = [];
+const drawGItems = () => { $('gItems').innerHTML = ''; gItems.forEach((q, i) => { const c = document.createElement('span'); c.className = 'chip'; c.textContent = KIND_NAME[q.k] + ' «' + nameOf(q.k, q.id) + '»'; const x = document.createElement('i'); x.textContent = '✕'; x.onclick = () => { gItems.splice(i, 1); drawGItems(); }; c.appendChild(x); $('gItems').appendChild(c); }); };
+$('gAdd').onclick = () => { const q = { k: $('gKind').value, id: $('gItem').value }; if (!gItems.some(x => x.k === q.k && x.id === q.id)) gItems.push(q); drawGItems(); };
+on('gSend', async () => {
+  const coins = Math.max(0, Math.round(+$('gCoins').value || 0)), mats = Math.max(0, Math.round(+$('gMats').value || 0)); if (!coins && !gItems.length && !mats) throw new Error('Укажи махмудики, детали или предметы');
+  const days = Math.max(0.05, +$('gDays').value || 7);
+  if (!confirm('Отправить подарок ВСЕМ игрокам?')) return;
+  await setCfg({ gift: { id: 'g' + Date.now(), coins, mats, items: gItems, text: $('gText').value.trim(), from: 0, until: Date.now() + days * 864e5 } });
+  gItems = []; drawGItems(); toast('Подарок отправлен всем'); loadCfg();
+});
+on('gOff', async () => { await setCfg({ gift: deleteField() }); toast('Подарок отменён'); loadCfg(); });
+on('aSend', async () => {
+  const text = $('aText').value.trim(); if (!text) throw new Error('Напиши текст');
+  await setCfg({ ann: { id: 'a' + Date.now(), text, until: Date.now() + Math.max(0.05, +$('aDays').value || 3) * 864e5 } }); toast('Объявление опубликовано'); loadCfg();
+});
+on('aOff', async () => { await setCfg({ ann: deleteField() }); toast('Объявление убрано'); loadCfg(); });
+function evDraft() {
+  const name = $('eName').value.trim(), st = $('eStart').value ? new Date($('eStart').value).getTime() : NaN;
+  const dur = ((+$('eDays').value || 0) * 24 + (+$('eHours').value || 0)) * 3600e3;
+  return { name, start: st, end: st + dur, dur, mul: +$('eMul').value || 1, gift: Math.max(0, Math.round(+$('eGift').value || 0)), banner: $('eBanner').value.trim(), color: $('eColor').value };
+}
+function evPrev() { const e = evDraft(); $('ePrev').textContent = isFinite(e.start) && e.dur > 0 ? `Начнётся ${fmtD(e.start)}, закончится ${fmtD(e.end)}` + (e.start > Date.now() ? ` (старт через ${left(e.start - Date.now())})` : ' (начнётся сразу)') : ''; }
+['eStart', 'eDays', 'eHours'].forEach(id => $(id).addEventListener('input', evPrev));
+{ const d = new Date(Date.now() + 3600e3); d.setMinutes(0, 0, 0); const p = n => String(n).padStart(2, '0'); $('eStart').value = `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:00`; evPrev(); }
+on('eSend', async () => {
+  const e = evDraft(); if (!e.name) throw new Error('Напиши название'); if (!isFinite(e.start)) throw new Error('Укажи начало'); if (!(e.dur > 0)) throw new Error('Укажи длительность');
+  if (e.end < Date.now()) throw new Error('Ивент уже закончился бы — проверь даты');
+  delete e.dur; e.id = 'e' + Date.now();
+  await setCfg({ ev: e }); toast('Ивент запланирован'); loadCfg();
+});
+on('eOff', async () => { await setCfg({ ev: deleteField() }); toast('Ивент отменён'); loadCfg(); });
+</script>
+</body></html>
